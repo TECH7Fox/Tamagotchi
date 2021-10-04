@@ -14,7 +14,7 @@ public class Tamagotchi {
     }
 
     public void feed() {
-        strength += 1;
+        if (!isDead() && eggFase == 3) strength += 1;
     }
 
     public int getHappiness() {
@@ -22,7 +22,7 @@ public class Tamagotchi {
     }
 
     public void love() {
-        happiness += 1;
+        if (!isDead() && eggFase == 3) happiness += 1;
     }
 
     public void breakEgg() {
@@ -52,5 +52,10 @@ public class Tamagotchi {
         this.happiness = happiness;
         this.lifeTime = lifeTime;
         this.eggFase = eggFase;
+    }
+
+    public boolean isDead() {
+        if (happiness <= 0 || strength <= 0) return true;
+        return false;
     }
 }

@@ -9,9 +9,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Date;
 
@@ -55,8 +58,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 startTimer();
                 break;
         }
-
         updateTamagotchi();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.resetBtn:
+                resetTamagotchi();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -142,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (tamagotchi.getHappiness() <= 0 || tamagotchi.getStrength() <= 0) {
+                if (tamagotchi.isDead()) {
                     ivTamagotchi.setImageResource(R.drawable.dead);
                 } else {
                     tamagotchi.secondPassed();
@@ -152,5 +171,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
         }, 1000);
+    }
+
+    public void resetTamagotchi() {
+        SharedPreferences.Editor spEdit = sp.edit();
+        spEdit.putInt("strength", 10);
+        spEdit.putInt("happiness", 10);
+        spEdit.putInt("lifeTime", 0);
+        spEdit.putInt("eggFase", 0);
+        spEdit.commit();
+
+        tamagotchi.setData(10, 10, 0, 0);
+        ivTamagotchi.setImageResource(R.drawable.egg);
+        updateTamagotchi();
     }
 }
