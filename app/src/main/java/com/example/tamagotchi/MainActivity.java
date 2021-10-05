@@ -3,6 +3,9 @@ package com.example.tamagotchi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -51,13 +54,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             sp.getInt("lifeTime", 10),
             sp.getInt("eggFase", 0));
 
-        switch (tamagotchi.getEggFase()) {
-            case 1: ivTamagotchi.setImageResource(R.drawable.egg_crack); break;
-            case 2: ivTamagotchi.setImageResource(R.drawable.egg_cracked); break;
-            case 3: ivTamagotchi.setImageResource(R.drawable.animal);
-                startTimer();
-                break;
-        }
+        setImage();
+        if (tamagotchi.getEggFase() >= 3) startTimer();
         updateTamagotchi();
     }
 
@@ -91,28 +89,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             long now = (new Date()).getTime()
                     + (sensorEvent.timestamp - System.nanoTime()) / 1000000L;
 
-            if (ac >= 2 && now - lastTime > 400)
+            if (ac >= 1 && now - lastTime > 400)
             {
                 lastTime = now;
                 shakeCount++;
                 if (shakeCount >= 5) {
                     tamagotchi.breakEgg();
-                    shakeCount = 0;
-                    switch (tamagotchi.getEggFase()) {
-                        case 1: ivTamagotchi.setImageResource(R.drawable.egg_crack); break;
-                        case 2: ivTamagotchi.setImageResource(R.drawable.egg_cracked); break;
-                        case 3: ivTamagotchi.setImageResource(R.drawable.animal);
-                            startTimer();
-                        break;
-                    }
 
                     SharedPreferences.Editor spEdit = sp.edit();
                     spEdit.putInt("eggFase", tamagotchi.getEggFase());
                     spEdit.apply();
+
+                    shakeCount = 0;
+                    setImage();
+                    if (tamagotchi.getEggFase() >= 3) startTimer();
                 }
             }
         }
-
     }
 
     @Override
@@ -148,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         tvStrength.setText("Strength: " + tamagotchi.getStrength());
         tvHappiness.setText("Happiness: " + tamagotchi.getHappiness());
         tvLifeTime.setText("LifeTime: " + tamagotchi.getLifeTime() + " seconds");
+        setImage();
 
         SharedPreferences.Editor spEdit = sp.edit();
         spEdit.putInt("strength", tamagotchi.getStrength());
@@ -166,11 +160,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 } else {
                     tamagotchi.secondPassed();
                     updateTamagotchi();
-                    handler.postDelayed(this, 1000);
-                    System.out.print("run");
                 }
+                handler.postDelayed(this, 1000);
+                System.out.print("run");
             }
         }, 1000);
+    }
+
+    private void setImage() {
+        switch (tamagotchi.getEggFase()) {
+            case 0: ivTamagotchi.setImageResource(R.drawable.egg); break;
+            case 1: ivTamagotchi.setImageResource(R.drawable.egg_cracked); break;
+            case 2: ivTamagotchi.setImageResource(R.drawable.egg_open); break;
+            case 3:
+                if (tamagotchi.getHappiness() > 20) ivTamagotchi.setImageResource(R.drawable.happy);
+                else if (tamagotchi.getHappiness() < 10) ivTamagotchi.setImageResource(R.drawable.angry);
+                else ivTamagotchi.setImageResource(R.drawable.idle);
+                break;
+        }
     }
 
     public void resetTamagotchi() {
@@ -182,7 +189,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         spEdit.commit();
 
         tamagotchi.setData(10, 10, 0, 0);
-        ivTamagotchi.setImageResource(R.drawable.egg);
         updateTamagotchi();
     }
 }
