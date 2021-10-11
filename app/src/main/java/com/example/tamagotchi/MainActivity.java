@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             long now = (new Date()).getTime()
                     + (sensorEvent.timestamp - System.nanoTime()) / 1000000L;
 
-            if (ac >= 1 && now - lastTime > 400)
+            if (ac >= 2 && now - lastTime > 400)
             {
                 lastTime = now;
                 shakeCount++;
@@ -168,27 +168,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void setImage() {
-        switch (tamagotchi.getEggFase()) {
-            case 0: ivTamagotchi.setImageResource(R.drawable.egg); break;
-            case 1: ivTamagotchi.setImageResource(R.drawable.egg_cracked); break;
-            case 2: ivTamagotchi.setImageResource(R.drawable.egg_open); break;
-            case 3:
-                if (tamagotchi.getHappiness() > 20) ivTamagotchi.setImageResource(R.drawable.happy);
-                else if (tamagotchi.getHappiness() < 10) ivTamagotchi.setImageResource(R.drawable.angry);
-                else ivTamagotchi.setImageResource(R.drawable.idle);
-                break;
+        if (!tamagotchi.isDead()) {
+            switch (tamagotchi.getEggFase()) {
+                case 0:ivTamagotchi.setImageResource(R.drawable.egg);break;
+                case 1:ivTamagotchi.setImageResource(R.drawable.egg_cracked);break;
+                case 2:ivTamagotchi.setImageResource(R.drawable.egg_open);break;
+                case 3:
+                    if (tamagotchi.getHappiness() > 20) ivTamagotchi.setImageResource(R.drawable.happy);
+                    else if (tamagotchi.getHappiness() < 10) ivTamagotchi.setImageResource(R.drawable.angry);
+                    else ivTamagotchi.setImageResource(R.drawable.idle);
+                    break;
+            }
         }
     }
 
     public void resetTamagotchi() {
         SharedPreferences.Editor spEdit = sp.edit();
         spEdit.putInt("strength", 10);
-        spEdit.putInt("happiness", 10);
+        spEdit.putInt("happiness", 15);
         spEdit.putInt("lifeTime", 0);
         spEdit.putInt("eggFase", 0);
         spEdit.commit();
 
-        tamagotchi.setData(10, 10, 0, 0);
+        tamagotchi.setData(10, 15, 0, 0);
         updateTamagotchi();
     }
 }
